@@ -1,12 +1,29 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from models import Pessoas, Atividades, Usuarios
+from flask_httpauth import HTTPBasicAuth  # autenticação básica com login de usuário e senha
 
+auth = HTTPBasicAuth()  # criar auth
 app = Flask(__name__)
 api = Api(app)
 
+#USUARIOS = {
+#   'felipe': '321',
+#    'romano': '321'
+#} #Dicionário de usuarios/senhas hardcoded para autenticação
+
+@auth.verify_password
+def Verificacao(login, senha):
+    #print('Validando usuario e senha: ')
+    #print(USUARIOS.get(login) == senha)
+    if not (login, senha):
+        return False
+    #return USUARIOS.get(login) == senha
+    return Usuarios.query.filter_by(login=login, senha=senha).first()
+
 
 class Pessoa(Resource):
+    @auth.login_required
     def get(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
@@ -46,6 +63,7 @@ class Pessoa(Resource):
 
 
 class ListaPessoa(Resource):
+    @auth.login_required
     def get(self):
         pessoas = Pessoas.query.all()  # CUIDAR PARA NÃO UTILIZAR EM TABELAS GRANDES! Retorna todos os dados da tabela
         response = [{'id': i.id, 'nome': i.nome, 'idade': i.idade} for i in pessoas]
@@ -66,7 +84,7 @@ class ListaPessoa(Resource):
 class ListaAtividade(Resource):
     def get(self):
         atividades = Atividades.query.all()
-        response = [{'id':i.id, 'nome':i.nome, 'pessoa':i.pessoa.nome} for i in atividades]
+        response = [{'id': i.id, 'nome': i.nome, 'pessoa': i.pessoa.nome} for i in atividades]
         return response
 
     def post(self):

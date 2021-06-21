@@ -22,7 +22,8 @@ class Pessoas(Base):
     # nome.
     idade = Column(Integer)
 
-    def __repr__(self): #É uma função opcional e estabelece o padrão de retorno dos dados da tabela ao realizar uma busca na tabela correspondente.
+    def __repr__(
+            self):  # É uma função opcional e estabelece o padrão de retorno dos dados da tabela ao realizar uma busca na tabela correspondente.
         return '<Pessoa {}>'.format(self.nome)
 
     # Permite que eu de commit na inserção sem ter que manualmente escrever na função 'insere_pessoas' no arquivo 'utils'
@@ -46,6 +47,24 @@ class Atividades(Base):
         return '<Atividades {}>'.format(self.nome)
 
     # Permite que eu de commit na inserção sem ter que manualmente escrever na função 'insere_pessoas' no arquivo 'utils'
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
+
+
+class Usuarios(Base):
+    __tablename__ = 'usuarios'
+    id = Column(Integer, primary_key=True)
+    login = Column(String(20), unique=True)  # Unique não permite dois usuários com o mesmo nome
+    senha = Column(String(20))
+
+    def __repr__(self):
+        return '<Usuario {}>'.format(self.login)
+
     def save(self):
         db_session.add(self)
         db_session.commit()
