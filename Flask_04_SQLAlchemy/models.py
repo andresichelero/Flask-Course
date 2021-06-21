@@ -22,7 +22,7 @@ class Pessoas(Base):
     # nome.
     idade = Column(Integer)
 
-    def __repr__(self):
+    def __repr__(self): #É uma função opcional e estabelece o padrão de retorno dos dados da tabela ao realizar uma busca na tabela correspondente.
         return '<Pessoa {}>'.format(self.nome)
 
     # Permite que eu de commit na inserção sem ter que manualmente escrever na função 'insere_pessoas' no arquivo 'utils'
