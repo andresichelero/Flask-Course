@@ -7,18 +7,19 @@ auth = HTTPBasicAuth()  # criar auth
 app = Flask(__name__)
 api = Api(app)
 
-#USUARIOS = {
+
+# USUÁRIOS = {
 #   'felipe': '321',
 #    'romano': '321'
-#} #Dicionário de usuarios/senhas hardcoded para autenticação
+# } #Dicionário de usuários/senhas hardcoded para autenticação
 
 @auth.verify_password
 def Verificacao(login, senha):
-    #print('Validando usuario e senha: ')
-    #print(USUARIOS.get(login) == senha)
+    # print('Validando usuario e senha: ')
+    # print(USUARIOS.get(login) == senha)
     if not (login, senha):
         return False
-    #return USUARIOS.get(login) == senha
+    # return USUARIOS.get(login) == senha
     return Usuarios.query.filter_by(login=login, senha=senha).first()
 
 
@@ -41,7 +42,8 @@ class Pessoa(Resource):
 
     def put(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
-        dados = request.json  # Já recebe os dados no formato JSON, mas se receber dados em formato diferente, irá ocorrer erro
+        dados = request.json  # Já recebe os dados no formato JSON, mas se receber dados em formato diferente,
+        # irá ocorrer erro
         # Atentar a diferentes bibliotecas do Flask: request e Request!
         if 'nome' in dados:
             pessoa.nome = dados['nome']
