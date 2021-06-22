@@ -1,0 +1,291 @@
+API:
+Conjunto de rotinas utilizada para acessar apps, programas, etc.. baseados na web
+Application Programming Interface
+Integração de serviços/softwares diferentes/Sistemas interligados
+Baseado na web/local/programas diferentes
+Ex de API Web: mercado livre, facebook, google, etc.
+Por exemplo, chat automático, publicar produtos sem abrir o site no browser
+Consultas variadas, consultar CEP, etc.
+Ex de API programas: Windows, para mover arquivos, mover diretórios, coisas do OS
+No android/iOS também, notificar usuários, etc.
+
+REST:
+Modelo de arquitetura de software baseado em comunicação via rede
+Representational State Transfer
+Todo recurso deve responder aos mesmos métodos.
+É somente uma arquietura, como aplicar as APIs na web.
+
+REST API:
+API desenvolvida com os principios da arquitetura REST
+Comunicação/integração entre software através de serviços web
+Baseado na web, funciona via HTTP requests
+Formatos comuns: JSON e XML. Também são usados páginas HTML, PDF, arquivo de imagens.
+Nas REST APIs, cada método deve ser responsável por um tipo diferente de ação.
+EX: Consulta, alteração, inclusão, exclusão, cada um com um método diferente único.
+
+Métodos principais do protocolo HTTP:
+GET- Solicita algum recurso ou objeto do servidor por meio da URI.
+POST- Método usado para envio de arquivo/dados/formulário HTML para o servidor.
+PUT- Criar ou modificar um objeto do servidor.
+DELETE- Informa via URI o objeto a ser deletado.
+
+URL: Uniform Resource Locator
+É o endereço do HOST que será acessado.
+ex: facebook.com
+
+URN: Uniform Resource Name
+É o recurso que será identificado.
+ex: /categoria/blog/
+
+URI: Uniform Resource Identifier
+É o identificador do recurso. É a junção da URL+URN+protocolo
+Protocolo(https://), URL(facebook.com) e URN(/categoria/blog/)
+
+XML:
+Linguagem de marcação
+Compartilhamento de informações através de requisições web;
+A resposta das APIs geralmente são XML ou JSON.
+Ex:
+<xmlCEP>
+	<cep>22020-392</cep>
+</xmlCEP>
+
+JSON:
+Formato de troca de dados entre sistemas independente da linguagem utilizada.
+{
+	"cep": "22020-392",
+	"logradouro"
+}
+
+###########################################################################################################
+
+
+FLASK:
+Microframework para Python, para desenvolvimento de aplicações web e APIs.
+É leve, simples, mas estendível. Torna uma das melhores opções para desenvolvimento simples.
+Não possui camada de abstração para banco de dados, validação de formulários, entre outros.
+
+
+###########################################################################################################
+
+#Hello World básico com Flask:
+
+from flask import Flask     #Importa a biblioteca Flask
+app = Flask(__name__)   #Criação de um app Flask, de nome "__name__"
+
+
+@app.route("/<numero>", methods = ['GET', 'POST'])  #Define a rota dos requests HTTP
+def ola(numero):  #Criação da primeira rota do app, na função ola
+    return 'Olá mundo. {}' .format(numero)
+
+
+if __name__ == "__main__":  #Executa o aplicativo, somente se ele for o projeto principal
+    app.run(debug=True)
+
+
+###########################################################################################################
+
+#Utilizando métodos, biblioteca Request e JSON
+
+from flask import Flask, jsonify, request
+import json
+app = Flask(__name__)
+
+
+@app.route('/<int:id>')   #Com a tipagem 'int', é impossível verificar com outros dados além da ID
+def pessoas(id):
+    return jsonify({'id':id, 'nome':'Rafael', 'profissao':'Desenvolvedor'})
+
+#@app.route('/soma/<int:valor1>/<int:valor2>')
+#def soma(valor1, valor2):
+#    return jsonify({'soma':valor1+valor2})
+
+@app.route('/soma', methods=['POST', 'GET'])
+def soma():
+    if request.method == 'POST':
+        dados = json.loads(request.data)
+        total = sum(dados['valores'])
+    elif request.method == 'GET':
+        total = 10 + 10
+    return jsonify({'soma':total})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+###########################################################################################################
+
+JSONIFY: This function wraps dumps() to add a few enhancements that make life easier. It turns the JSON output into a Response object with the application/json mimetype. For convenience, it also converts multiple arguments into an array or multiple keyword arguments into a dict. This means that both jsonify(1,2,3) and jsonify([1,2,3]) serialize to [1,2,3].
+
+#Example usage:
+
+from flask import jsonify
+
+@app.route('/_get_current_user')
+def get_current_user():
+    return jsonify(username=g.user.username,
+                   email=g.user.email,
+                   id=g.user.id)
+This will send a JSON response like this to the browser:
+
+{
+    "username": "admin",
+    "email": "admin@localhost",
+    "id": 42
+}
+
+###########################################################################################################
+
+from flask import Flask, jsonify, request
+import json
+
+app = Flask(__name__)
+
+devs = [
+    {
+        'id':'0',
+        'nome':'Rafael',
+     'habilidades':['Python', 'Flask']
+     },
+    {
+        'id':'1',
+        'nome':'Andre',
+     'habilidades':['Python', 'Nenhuma']}
+]
+
+#devolve como resposta um desenvolvedor, via ID, além de adicionar ou deletar
+
+@app.route('/dev/<int:id>', methods = ['GET', 'PUT', 'DELETE'])
+def desenvolvedor(id):
+    if request.method == 'GET':
+        try:
+            response = devs[id]
+        except IndexError:
+            mensagem = 'Desenvolvedor não existente'.format(id)
+            response = {'status':'erro de consulta', 'mensagem':mensagem}
+        except Exception:
+            mensagem = 'Erro desconhecido: procure um administrador'
+            response = {'status':'erro', 'mensagem':mensagem}
+        return jsonify(response)
+    elif request.method == 'PUT':
+        dados = json.loads(request.data)
+        devs[id] = dados
+        return jsonify(dados)
+    elif request.method == 'DELETE':
+        devs.pop(id)
+        return jsonify({'status':'sucesso', 'mensagem':'Registro excluido'})
+
+#lista todos os desenvolvedores e permite registrar um novo desenvolvedor
+
+@app.route('/dev/', methods=['POST', 'GET'])
+def lista_desenvolvedores():
+    if request.method == 'POST':
+        dados = json.loads(request.data)
+        posicao = len(devs)
+        dados['id'] = posicao
+        devs.append(dados)
+        return jsonify(devs[posicao], {'status':'sucesso', 'mensagem': 'registro inserido'})
+    elif request.method == 'GET':
+        return jsonify(devs)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+###########################################################################################################
+
+from flask import Flask, jsonify, request
+import json
+
+app = Flask(__name__)
+
+#API ESCRITA DO ZERO COMO EXERCÍCIO DE PRÁTICA DO CURSO PYTHON - FLASK
+
+lista = [
+    {
+        'id':'0',
+        'responsavel':'Joao',
+        'tarefa':'Resolver calculos de matematica',
+        'status':'incompleto'
+    },
+    {
+        'id':'1',
+        'responsavel':'Maria',
+        'tarefa':['Cadastrar novos usuarios no programa', 'Enviar os relatorios por email'],
+        'status':'concluido'
+    }
+]
+
+#Realiza a consulta do cadastro das tarefas, adiciona novas tarefas/informações, e também as deleta
+@app.route('/tarefa/<int:id>', methods = ['PUT', 'GET', 'DELETE'])
+def tara(id):
+    if request.method == 'GET':
+        try:
+            response = lista[id]
+        except IndexError:
+            mensagem = 'ID de tarefa não existente'.format(id)
+            response = {'status':'Erro: Tarefa nao existe', 'mensagem':mensagem}
+        except Exception:
+            mensagem = 'Erro desconhecido: procure um administrador'
+            response = {'status':'erro', 'mensagem':mensagem}
+        return jsonify(response)
+    elif request.method == 'PUT':
+        dados = json.loads(request.data)
+        lista[id] = dados
+        return jsonify(dados)
+    elif request.method == 'DELETE':
+        lista.pop(id)
+        return jsonify({'status':'sucesso', 'mensagem':'Registro excluido'})
+
+#Lista todas e permite criar novas tarefas
+@app.route('/tarefa/', methods = ['POST', 'GET'])
+def tera():
+    if request.method == 'POST':
+        dados = json.loads(request.data)
+        posicao = len(lista)
+        dados['id'] = posicao
+        lista.append(dados)
+        return jsonify({'status':'sucesso', 'mensagem':'Registro incluído'})
+    elif request.method == 'GET':
+        return jsonify(lista)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+$$ print('O {} é muito usado para a tecla espaço.'.format(dedos[4]['nome'])) $$ ????
+
+O comando IndexError ocorre quando:
+Tipos de dados compostos são utilizados de forma errada.
+
+##########################################################################################################
+
+REST vs. RESTful
+
+REST é um estilo de arquitetura, modelo para ser seguido ao desenvolver APIs.
+
+RESTful é um serviço web que utiliza do paradigma REST, utilizando webservices feitos sob a arquitetura REST também.
+Toda aplicação web que segue a arquitetura REST, é uma aplicação RESTful.
+
+###########################################################################################################
+
+SQLAlchemy
+
+ORM para Python (Object-Relational Mapping)
+
+Em ORM, as tabelas viram Classes, sem precisar de conhecimento de SQL para utiliza-lo.
+Fornece conjunto completo de padrões de persistência.
+
+###########################################################################################################
+
+SQLite
+
+Biblioteca de linguagem C, que implementa mecanismo de banco de dados pequeno, rápido e autonomo.
+Banco de dados simples e prático, utilizado em smarthphones. 
+
+##########################################################################################################
+
+Flask-httpauth
+
+Extensão do Flask que simplifica autenticação. Diferentes tipos de autenticação, com usuário e senha até tokens.
+
+###########################################################################################################
